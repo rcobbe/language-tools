@@ -1,0 +1,34 @@
+Name:               language-tools
+Version:            0.1
+Cabal-Version:      >= 1.14
+Author:             Richard Cobbe
+Synopsis:           Tool for type setting lexicon, morphological database
+Build-Type:         Simple
+License:            AllRightsReserved
+Copyright:          (c) 2017 Richard Cobbe
+Maintainer:         rcobbe@pobox.com
+Stability:          alpha
+
+Library
+  hs-source-dirs: lib
+  Default-Language: Haskell2010
+  GHC-Options: -fwarn-incomplete-patterns -fwarn-unrecognised-pragmas
+  Exposed-Modules:
+    LanguageTools.Latin.Ast
+  Build-Depends:
+    base == 4.8.*,
+    containers == 0.5.*,
+    text == 1.2.*,
+    textual == 1.1.*
+
+Test-Suite language-tools-tests
+  Main-Is: RunTests.hs
+  hs-source-dirs: test
+  Type: exitcode-stdio-1.0
+  Default-Language: Haskell2010
+  Ghc-Options: -fwarn-incomplete-patterns
+  Build-Depends:
+    base == 4.8.*,
+    language-tools
+                     
+                     
