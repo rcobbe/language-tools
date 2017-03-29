@@ -202,4 +202,12 @@ checkOverrides loc overrides =
                  show parse)
           | otherwise = Map.insert parse override accum
 
+happyError :: Token -> Alex a
+happyError t =
+  alexError
+    (formatLocationForError (loc t) .
+      ("parse error on token " ++) .
+      (formatTokenForError t "\n"))
+
+
 }
