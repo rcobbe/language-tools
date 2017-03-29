@@ -1,9 +1,9 @@
-module LanguageTools.Latin.Ast where
+module LT.Latin.Ast where
 
 import Data.Map (Map)
 import Data.Set (Set)
 
-import LanguageTools.Text (Text)
+import LT.Text (Text)
 
 -- | A single vocabulary item, with morphological information and definitions.
 data Entry = Entry { entryPos :: Location

@@ -1,12 +1,12 @@
 -- -*- haskell -*-
 {
-module LanguageTools.Latin.Parser(parse) where
+module LT.Latin.Parser(parse) where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
 
-import LanguageTools.Latin.Ast
-import LanguageTools.Text
+import LT.Latin.Ast
+import LT.Text
 
 }
 

@@ -2,18 +2,18 @@
 --   switch underlying representations.  The precise set of operations defined
 --   is somewhat ad-hoc.
 
-module LanguageTools.Text(
+module LT.Text(
     Text
   , fromString
   , toString
   , singleton
   , cons
-  , LanguageTools.Text.null
-  , LanguageTools.Text.init
-  , LanguageTools.Text.last
+  , LT.Text.null
+  , LT.Text.init
+  , LT.Text.last
   , append
-  , LanguageTools.Text.concat
-  , LanguageTools.Text.concatMap
+  , LT.Text.concat
+  , LT.Text.concatMap
   , intercalate
   ) where
 
