@@ -13,9 +13,15 @@ data Entry = Entry { entryPos :: Location
                    , note :: Maybe Text
                      -- ^ additional non-definitional information about lexeme
                    , definitions :: [Definition]
+                     -- ^ non-empty list of definitions
                    , subEntries :: [Entry]
-                   , citation :: [Citation]
+                   , citations :: [Citation]
                    }
+
+-- XXX should entryNum be in Entry or in HeadWord?  Putting it in HeadWord
+-- could make it easier for morphological generation to link back to the full
+-- head word, including entryNum.  Moving it there does complicate the HeadWord
+-- representation, however.
 
 -- Definition subcategorization and syntactic information are put into a
 -- general "note" field, rather than devising a statically-typed representation
@@ -51,8 +57,8 @@ data HeadWord = Noun { nom :: Text
 --   to leave it out and require users to mark text with @\\textup@ instead,
 --   as that allows them more flexibility about where the note appears in
 --   relation to the main definition text.
-data Definition = Definition Text
-                deriving (Eq, Show)
+newtype Definition = Definition Text
+                   deriving (Eq, Show)
 
 -- | Specifies a source for a lexicon entry.  We track location info so that
 --   later, when we add a mechanism for users to specify the allowed set of
@@ -84,7 +90,7 @@ data VerbParse = Finite Person Number Tense Voice Mood
 data Gender = Masc | Fem | Neut
             deriving (Eq, Ord, Show, Bounded, Enum)
 
-data Case = Nom | Gen | Dat | Acc | Abl | Voc | Loc
+data Case = Nom | Gen | Dat | Acc | Abl | Loc | Voc
           deriving (Eq, Ord, Show, Bounded, Enum)
 
 data Number = Sing | Dual | Pl
@@ -108,3 +114,7 @@ data Location = Location { sourceName :: !String
                          , col        :: !Int
                          }
                 deriving (Eq, Ord, Show)
+
+formatLocationForError :: Location -> ShowS
+formatLocationForError (Location src line col) =
+  (src ++) . shows ':' . shows line . shows ':' . shows col . (": " ++)
