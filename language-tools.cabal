@@ -14,9 +14,11 @@ Library
   Default-Language: Haskell2010
   GHC-Options: -fwarn-incomplete-patterns -fwarn-unrecognised-pragmas
   Exposed-Modules:
-    LanguageTools.Latin.Ast
+    LanguageTools.Latin.Ast,
+    LanguageTools.Latin.Parser
   Build-Depends:
     base == 4.8.*,
+    array == 0.5.*,
     containers == 0.5.*,
     text == 1.2.*,
     textual == 1.1.*
