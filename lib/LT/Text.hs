@@ -15,6 +15,7 @@ module LT.Text(
   , LT.Text.concat
   , LT.Text.concatMap
   , intercalate
+  , LT.Text.reverse
   ) where
 
 import qualified Data.String as String
@@ -72,3 +73,7 @@ concatMap f = Text . T.concatMap (unbox . f) . unbox
 --   concatenates the result.
 intercalate :: Text -> [Text] -> Text
 intercalate sep = Text . T.intercalate (unbox sep) . map unbox
+
+-- | Reverse a 'Text' value.
+reverse :: Text -> Text
+reverse = Text . T.reverse . unbox
