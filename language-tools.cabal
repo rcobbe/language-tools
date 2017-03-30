@@ -15,7 +15,8 @@ Library
   GHC-Options: -fwarn-incomplete-patterns -fwarn-unrecognised-pragmas
   Exposed-Modules:
     LT.Latin.Ast,
-    LT.Latin.Parser
+    LT.Latin.Parser,
+    LT.Latin.Scanner
   Build-Depends:
     base == 4.8.*,
     array == 0.5.*,

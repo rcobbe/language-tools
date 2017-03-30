@@ -2,11 +2,14 @@
 {
 module LT.Latin.Parser(parse) where
 
+import qualified Control.Monad as CM
 import Data.Map (Map)
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 
 import LT.Latin.Ast
-import LT.Text
+import LT.Latin.Scanner
+import LT.Text (Text)
 
 }
 
@@ -19,6 +22,8 @@ import LT.Text
 %token
   '('           { Tok_LParen {} }
   ')'           { Tok_RParen {} }
+  noun          { Tok_Noun {} }
+  verb          { Tok_Verb {} }
   ellipsis      { Tok_Ellipsis {} }
   m             { Tok_M {} }
   f             { Tok_F {} }
@@ -48,9 +53,9 @@ import LT.Text
   imper         { Tok_Imper {} }
   subj          { Tok_Subj {} }
   inf           { Tok_Inf {} }
-  kwInvalid     { Tok_kwInvalid {} }
-  kwReplace     { Tok_kwReplace {} }
-  kwAugment     { Tok_kwAugment {} }
+  kwInvalid     { Tok_KwInvalid {} }
+  kwReplace     { Tok_KwReplace {} }
+  kwAugment     { Tok_KwAugment {} }
   kwNote        { Tok_KwNote {} }   -- #:note
   kwCite        { Tok_KwCite {} }   -- #:cite
   string        { Tok_StrLit {} }
@@ -66,15 +71,21 @@ Entry :: { Entry }
   : '(' Head Body ')'                   { mkEntry (loc $1) $2 $3 }
 
 Head :: { HeadWord }
-  : Word Word
-    NonEmptySeq(Gender)
-    Seq(Override(NounParse))            { Noun $1 $2 (Set.fromList $3)
-                                            (checkOverrides (loc $1) $4) }
-  | Word Word Word Word
-    Seq(Override(VerbParse))            { Verb $1 $2 $3 $4
-                                            (checkOverides (loc $1) $5) }
+  : noun NounHead                       { $2 }
+  | verb VerbHead                       { $2 }
   | Word ellipsis Word                  { Correlative $1 $3 }
   | Word                                { Indeclinable $1 }
+
+NounHead :: { HeadWord }
+  : WordPos Word
+    NonEmptySeq(Gender)
+    Seq(Override(NounParse))            {% checkOverrides (snd $1) $4 >>=
+                                             return . (Noun (fst $1) $2
+                                                        (Set.fromList $3)) }
+VerbHead :: { HeadWord }
+  : WordPos Word Word Word
+    Seq(Override(VerbParse))            {% checkOverrides (snd $1) $5 >>=
+                                             return . (Verb (fst $1) $2 $3 $4) }
 
 Body :: { Body }
   : Opt(Note)
@@ -83,14 +94,14 @@ Body :: { Body }
     NonEmptySeq(Citation)               { Body $1 $2 $3 $4 }
 
 Note :: { Text }
-  : kwNote string                       { $2 }
+  : kwNote string                       { (strval $2) }
 
 Definition :: { Definition }
-  : string                              { Definition $1 }
+  : string                              { Definition (strval $1) }
 
 Citation :: { Citation }
   : kwCite symbol number                { Textbook (loc $1)
-                                            (T.fromString (symval $2))
+                                            (symval $2)
                                             (intval $3) }
 Gender :: { Gender }
   : m                                   { Masc }
@@ -133,8 +144,11 @@ Mood :: { Mood }
   | imper                               { Imper }
   | subj                                { Subj }
 
+WordPos :: { (Text, Location) }
+  : string                              { (strval $1, loc $1) }
+  | symbol                              { (symval $1, loc $1) }
+
 Word :: { Text }
-Word
   : string                              { strval $1 }
   | symbol                              { symval $1 }
 
@@ -144,7 +158,7 @@ Override(P)
   | kwReplace P
       '(' NonEmptySeq(Word) ')'         { ($2, Replacement (Set.fromList $4)) }
   | kwAugment P
-      '(' NonEmptySeq(Word) ')'         { ($2, Alternative (Set.fromlist $4)) }
+      '(' NonEmptySeq(Word) ')'         { ($2, Alternative (Set.fromList $4)) }
 
 NounParse :: { NounParse }
   : Gender Case Number                  { NounParse $1 $2 $3 }
@@ -174,6 +188,10 @@ RevNonEmptySeq(P)
 
 {
 
+parse :: String -> String -> Either String [Entry]
+parse srcName input =
+  runAlex input (initSourceName srcName >> parseLatin)
+
 data Body = Body { body_note :: Maybe Text
                  , body_defns :: [Definition]
                  , body_subentries :: [Entry]
@@ -186,28 +204,29 @@ mkEntry loc head body =
         head
         Nothing
         (body_note body)
-        (body_definitions body)
+        (body_defns body)
         (body_subentries body)
         (body_citations body)
 
-checkOverrides :: (Ord a, Show a) => Location -> [(a, b)] -> Map a b
+checkOverrides :: (Ord a, Show a) => Location -> [(a, b)] -> Alex (Map a b)
 checkOverrides loc overrides =
-  -- foldr :: (a -> b -> b) -> b -> [a] -> b
-  foldr checkOverride Map.empty overrides
-  where checkOverride (parse, override) accum
+  CM.foldM checkOverride Map.empty overrides
+  where checkOverride accum (parse, override)
           | parse `Map.member` accum =
               alexError
-                (formatLocationForError loc .
-                 ("duplicate override: " ++) .
-                 show parse)
-          | otherwise = Map.insert parse override accum
+                (formatLocationForError loc
+                  ("duplicate override: " ++ show parse))
+          | otherwise = return $ Map.insert parse override accum
+
+-- | Adapt scanner's interface to parser.  See Happy docs and Happy/Alex
+--   examples for details.
+lexwrap :: (Token -> Alex a) -> Alex a
+lexwrap = (alexMonadScan >>=)
 
 happyError :: Token -> Alex a
 happyError t =
   alexError
-    (formatLocationForError (loc t) .
-      ("parse error on token " ++) .
-      (formatTokenForError t "\n"))
-
+    (formatLocationForError (loc t)
+      ("parse error on token " ++ (shows t "\n")))
 
 }
