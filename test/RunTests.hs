@@ -5,6 +5,7 @@ import System.Exit
 import Test.HUnit
 
 import qualified Latin.ScannerTest
+import qualified Latin.ParserTest
 
 main :: IO ()
 main =
@@ -13,4 +14,6 @@ main =
 
 tests =
   "Language Tools" ~:
-  [Latin.ScannerTest.tests]
+  [ Latin.ScannerTest.tests
+  , Latin.ParserTest.tests
+  ]

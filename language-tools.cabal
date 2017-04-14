@@ -34,6 +34,7 @@ Test-Suite language-tools-tests
   Build-Depends:
     base == 4.8.*,
     HUnit == 1.6.*,
+    containers == 0.5.*,
     language-tools
                      
                      
