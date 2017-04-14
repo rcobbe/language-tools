@@ -17,6 +17,7 @@ data Entry = Entry { entryPos :: Location
                    , subEntries :: [Entry]
                    , citations :: [Citation]
                    }
+           deriving (Eq, Show)
 
 -- XXX should entryNum be in Entry or in HeadWord?  Putting it in HeadWord
 -- could make it easier for morphological generation to link back to the full
@@ -47,6 +48,7 @@ data HeadWord = Noun { nom :: Text
                      }
               | Correlative Text Text
               | Indeclinable Text
+              deriving (Eq, Show)
 
 -- XXX are there Latin nouns with more than one gender?
 
@@ -77,6 +79,7 @@ data Override =
     Invalid                 -- ^ Form does not exist
   | Replacement (Set Text)  -- ^ Replace regular form
   | Alternative (Set Text)  -- ^ Augment regular form
+  deriving (Eq, Show)
 
 -- | Identifies a specific form of a noun.
 data NounParse = NounParse Gender Case Number
