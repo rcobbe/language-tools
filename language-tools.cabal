@@ -16,7 +16,8 @@ Library
   Exposed-Modules:
     LT.Latin.Ast,
     LT.Latin.Parser,
-    LT.Latin.Scanner
+    LT.Latin.Scanner,
+    LT.Text
   Build-Depends:
     base == 4.8.*,
     array == 0.5.*,
@@ -32,6 +33,7 @@ Test-Suite language-tools-tests
   Ghc-Options: -fwarn-incomplete-patterns
   Build-Depends:
     base == 4.8.*,
+    HUnit == 1.6.*,
     language-tools
                      
                      
