@@ -6,7 +6,7 @@ import LT.Text
 import LT.Latin.Ast
 import LT.Latin.Scanner
 
-tests = "Latin Scanner" ~:
+tests = "Latin.ScannerTest" ~:
   [punctuationTests,
    stringTests,
    symbolTests,
