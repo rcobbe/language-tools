@@ -71,21 +71,21 @@ Entry :: { Entry }
   : '(' Head Body ')'                   { mkEntry (loc $1) $2 $3 }
 
 Head :: { HeadWord }
-  : noun NounHead                       { $2 }
-  | verb VerbHead                       { $2 }
+  : NounHead                       { $1 }
+  | VerbHead                       { $1 }
   | Word ellipsis Word                  { Correlative $1 $3 }
   | Word                                { Indeclinable $1 }
 
 NounHead :: { HeadWord }
-  : WordPos Word
+  : WordPos noun Word
     NonEmptySeq(Gender)
-    Seq(Override(NounParse))            {% checkOverrides (snd $1) $4 >>=
-                                             return . (Noun (fst $1) $2
-                                                        (Set.fromList $3)) }
+    Seq(Override(NounParse))            {% checkOverrides (snd $1) $5 >>=
+                                             return . (Noun (fst $1) $3
+                                                        (Set.fromList $4)) }
 VerbHead :: { HeadWord }
-  : WordPos Word Word Word
-    Seq(Override(VerbParse))            {% checkOverrides (snd $1) $5 >>=
-                                             return . (Verb (fst $1) $2 $3 $4) }
+  : WordPos verb Word Word Word
+    Seq(Override(VerbParse))            {% checkOverrides (snd $1) $6 >>=
+                                             return . (Verb (fst $1) $3 $4 $5) }
 
 Body :: { Body }
   : Opt(Note)
