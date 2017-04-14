@@ -117,4 +117,4 @@ data Location = Location { sourceName :: !String
 
 formatLocationForError :: Location -> ShowS
 formatLocationForError (Location src line col) =
-  (src ++) . shows ':' . shows line . shows ':' . shows col . (": " ++)
+  (src ++) . (":" ++) . shows line . (":" ++) . shows col . (": " ++)
