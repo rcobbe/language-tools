@@ -161,7 +161,7 @@ Override(P)
       '(' NonEmptySeq(Word) ')'         { ($2, Alternative (Set.fromList $4)) }
 
 NounParse :: { NounParse }
-  : Gender Case Number                  { NounParse $1 $2 $3 }
+  : Case Number                         { NounParse $1 $2 }
 
 VerbParse :: { VerbParse }
   : Person Number Tense Voice Mood      { Finite $1 $2 $3 $4 $5 }
