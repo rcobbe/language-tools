@@ -74,7 +74,14 @@ data Citation =
 -- | Morphological exceptions and overrides for a single entry.
 type OverrideMap key = Map key Override
 
--- | Overriding morphology for a particular form
+-- | Overriding morphology for a particular form.  Design choice: do we
+--   represent 'Invalid, 'Replacement', and 'Alternative' separately, or do
+--   we provide a single @Override@ form that contains a @Set Text@ and require
+--   the user to include the normal form as part of the set for an alternative?
+--
+--   The tradeoff exchanges user convenience for simplicity of representation
+--   (and of the input grammar).  I think I'll go with user convenience, at
+--   least for the moment.
 data Override =
     Invalid                 -- ^ Form does not exist
   | Replacement (Set Text)  -- ^ Replace regular form
@@ -82,7 +89,7 @@ data Override =
   deriving (Eq, Show)
 
 -- | Identifies a specific form of a noun.
-data NounParse = NounParse Gender Case Number
+data NounParse = NounParse Case Number
                deriving (Eq, Ord, Show)
 
 -- | Identifies a specific form of a verb.
