@@ -17,7 +17,6 @@ tests = "Latin.ParserTest" ~:
   -- , indeclTests
   -- , correlTests
   -- , subentryTests
-  -- , overrideTests
   ]
 
 nounTests = "nounTests" ~:
@@ -88,7 +87,25 @@ nounTests = "nounTests" ~:
                     , note = Nothing
                     , definitions = [Definition "god, goddess"]
                     , subEntries = []
-                    , citations = [Textbook (locn 6 3) "W" 2]}]
+                    , citations = [Textbook (locn 6 3) "W" 2]}],
+
+   "override" ~:
+   testParse (concat ["(deus noun m deī\n",
+                      "  #:invalid gen pl\n",
+                      "  #:augment voc sg (deī)\n",
+                      "  #:replace voc pl (bogusReplacement)\n",
+                      "  \"god, goddess\"\n"
+                      "  #:cite W 2)\n"])
+   ~?= Right [Entry { entryPos = locn 1 1
+                    , headWord = Noun "deus" "deī"
+                                   (Set.singleton Masc)
+                                   (Map.singleton (NounParse Masc Voc Sg)
+                                      (Alternative (Set.singleton "deī")))
+                    , entryNum = Nothing
+                    , note = Nothing
+                    , definitions = [Definition "god, goddess"]
+                    , subentries = []
+                    , citations = [Textbook (locn 4 3) "W" 2]}]
    ]
 
 testSrc = "test source"
