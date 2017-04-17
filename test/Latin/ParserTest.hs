@@ -93,19 +93,27 @@ nounTests = "nounTests" ~:
    testParse (concat ["(deus noun m deī\n",
                       "  #:invalid gen pl\n",
                       "  #:augment voc sg (deī)\n",
-                      "  #:replace voc pl (bogusReplacement)\n",
-                      "  \"god, goddess\"\n"
+                      "  #:replace voc pl (bogusReplacement bogusRepTwo)\n",
+                      "  \"god, goddess\"\n",
                       "  #:cite W 2)\n"])
    ~?= Right [Entry { entryPos = locn 1 1
                     , headWord = Noun "deus" "deī"
                                    (Set.singleton Masc)
-                                   (Map.singleton (NounParse Masc Voc Sg)
-                                      (Alternative (Set.singleton "deī")))
+                                   (Map.fromList [(NounParse Voc Sing,
+                                                   Alternative
+                                                     (Set.singleton "deī")),
+                                                  (NounParse Gen Pl, Invalid),
+                                                  (NounParse Voc Pl,
+                                                   Replacement
+                                                     (Set.fromList [
+                                                      "bogusReplacement",
+                                                      "bogusRepTwo"
+                                                      ]))])
                     , entryNum = Nothing
                     , note = Nothing
                     , definitions = [Definition "god, goddess"]
-                    , subentries = []
-                    , citations = [Textbook (locn 4 3) "W" 2]}]
+                    , subEntries = []
+                    , citations = [Textbook (locn 6 3) "W" 2]}]
    ]
 
 testSrc = "test source"
