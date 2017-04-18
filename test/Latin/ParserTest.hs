@@ -63,6 +63,29 @@ nounTests = "nounTests" ~:
                     , subEntries = []
                     , citations = [Textbook (locn 4 3) "W" 2]}],
 
+   "subentry" ~:
+   testParse (concat ["(poena noun f poenae\n",
+                      "  \"penalty, punishment\"\n",
+                      "  (\"poenās dāre\" \"to pay the penalty\"\n",
+                      "   #:cite W 2)\n",
+                      "  #:cite W 2)"])
+   ~?= Right [Entry { entryPos = locn 1 1
+                    , headWord = Noun "poena" "poenae"
+                                   (Set.singleton Fem)
+                                   Map.empty
+                    , entryNum = Nothing
+                    , note = Nothing
+                    , definitions = [Definition "penalty, punishment"]
+                    , subEntries = [
+                        Entry { entryPos = locn 3 3
+                              , headWord = Indeclinable "poenās dāre"
+                              , entryNum = Nothing
+                              , note = Nothing
+                              , definitions = [Definition "to pay the penalty"]
+                              , subEntries = []
+                              , citations = [Textbook (locn 4 4) "W" 2]}]
+                    , citations = [Textbook (locn 5 3) "W" 2]}],
+
    "multiple entries" ~:
    testParse (concat ["(nauta noun m nautae\n",
                       "  \"sailor\"\n",
