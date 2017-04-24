@@ -12,6 +12,7 @@ Stability:          alpha
 Library
   hs-source-dirs: lib
   Default-Language: Haskell2010
+  Build-Tools: alex, happy
   GHC-Options: -fwarn-incomplete-patterns -fwarn-unrecognised-pragmas
   Exposed-Modules:
     LT.Latin.Ast,
@@ -23,7 +24,7 @@ Library
     array == 0.5.*,
     containers == 0.5.*,
     text == 1.2.*,
-    textual == 1.1.*
+    textual == 2.0.*
 
 Test-Suite language-tools-tests
   Main-Is: RunTests.hs
