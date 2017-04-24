@@ -4,7 +4,8 @@ Cabal-Version:      >= 1.14
 Author:             Richard Cobbe
 Synopsis:           Tool for type setting lexicon, morphological database
 Build-Type:         Simple
-License:            AllRightsReserved
+License:            Apache-2.0
+License-File:       LICENSE
 Copyright:          (c) 2017 Richard Cobbe
 Maintainer:         rcobbe@pobox.com
 Stability:          alpha
