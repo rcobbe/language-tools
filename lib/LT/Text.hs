@@ -35,6 +35,7 @@ module LT.Text(
 import qualified Data.String as String
 import qualified Data.Text as T
 
+-- | Abstract text representation.
 newtype Text = Text { unbox :: T.Text }
              deriving (Eq, Ord, Show)
 
