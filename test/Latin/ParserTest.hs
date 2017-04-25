@@ -62,21 +62,6 @@ nounTests = "nounTests" ~:
                     , subEntries = []
                     , citations = [Textbook (locn 3 3) "W" 2]}],
 
-   "entry note" ~:
-   testParse (concat ["(deus noun m deī\n",
-                      "  #:note \"test note\"\n",
-                      "  \"god, goddess\"\n",
-                      "  #:cite W 2)"])
-   ~?= Right [Entry { entryPos = locn 1 1
-                    , headWord = Noun "deus" "deī"
-                                   (Set.singleton Masc)
-                                   Map.empty
-                    , entryNum = Nothing
-                    , note = Just "test note"
-                    , definitions = [Definition "god, goddess"]
-                    , subEntries = []
-                    , citations = [Textbook (locn 4 3) "W" 2]}],
-
    "override" ~:
    testParse (concat ["(deus noun m deī\n",
                       "  #:invalid gen pl\n",
@@ -103,6 +88,21 @@ nounTests = "nounTests" ~:
    ]
 
 generalTests = "generalTests" ~: [
+  "entry note" ~:
+  testParse (concat ["(deus noun m deī\n",
+                     "  #:note \"test note\"\n",
+                     "  \"god, goddess\"\n",
+                     "  #:cite W 2)"])
+  ~?= Right [Entry { entryPos = locn 1 1
+                   , headWord = Noun "deus" "deī"
+                                  (Set.singleton Masc)
+                                  Map.empty
+                   , entryNum = Nothing
+                   , note = Just "test note"
+                   , definitions = [Definition "god, goddess"]
+                   , subEntries = []
+                   , citations = [Textbook (locn 4 3) "W" 2]}],
+
   "multiple entries" ~:
   testParse (concat ["(nauta noun m nautae\n",
                      "  \"sailor\"\n",
