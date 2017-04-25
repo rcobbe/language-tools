@@ -27,7 +27,7 @@ import LT.Latin.Parser
 
 tests = "Latin.ParserTest" ~:
   [ nounTests
-  -- , verbTests
+  , verbTests
   -- , indeclTests
   -- , correlTests
   , generalTests
@@ -86,6 +86,39 @@ nounTests = "nounTests" ~:
                     , subEntries = []
                     , citations = [Textbook (locn 6 3) "W" 2]}]
    ]
+
+verbTests = "verbTests" ~: [
+  "simple verb" ~:
+  testParse (concat ["(amō verb amāre amāvī amātum\n",
+                     "  \"to like, love\"\n",
+                     "  #:cite W 3)\n"])
+  ~?= Right [Entry { entryPos = locn 1 1
+                   , headWord = Verb "amō" "amāre" "amāvī" "amātum" Map.empty
+                   , entryNum = Nothing
+                   , note = Nothing
+                   , definitions = [Definition "to like, love"]
+                   , subEntries = []
+                   , citations = [Textbook (locn 3 3) "W" 3]}],
+
+  "overrides" ~:
+  testParse (concat ["(dō verb dāre dēdī datum\n",
+                     "  #:replace 2nd sg pres act indic (das)\n",
+                     "  #:invalid pres pasv inf\n",
+                     "  \"to give\"\n",
+                     "  #:cite W 4)\n"])
+  ~?= Right [
+      Entry { entryPos = locn 1 1
+            , headWord = Verb "dō" "dāre" "dēdī" "datum"
+                           (Map.fromList
+                             [(Finite Second Sing Pres Active Indic,
+                               Replacement (Set.fromList ["das"])),
+                              (Infinitive Pres Passive, Invalid)])
+            , entryNum = Nothing
+            , note = Nothing
+            , definitions = [Definition "to give"]
+            , subEntries = []
+            , citations = [Textbook (locn 5 3) "W" 4]}]
+  ]
 
 generalTests = "generalTests" ~: [
   "multiple definitions" ~:
