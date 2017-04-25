@@ -122,16 +122,14 @@ nounTests = "nounTests" ~:
    ~?= Right [Entry { entryPos = locn 1 1
                     , headWord = Noun "deus" "deī"
                                    (Set.singleton Masc)
-                                   (Map.fromList [(NounParse Voc Sing,
-                                                   Alternative
-                                                     (Set.singleton "deī")),
-                                                  (NounParse Gen Pl, Invalid),
-                                                  (NounParse Voc Pl,
-                                                   Replacement
-                                                     (Set.fromList [
-                                                      "bogusReplacement",
-                                                      "bogusRepTwo"
-                                                      ]))])
+                                   (Map.fromList
+                                    [(NounParse Voc Sing,
+                                      Alternative (Set.singleton "deī")),
+                                     (NounParse Gen Pl, Invalid),
+                                     (NounParse Voc Pl,
+                                      Replacement
+                                       (Set.fromList ["bogusReplacement",
+                                                      "bogusRepTwo"]))])
                     , entryNum = Nothing
                     , note = Nothing
                     , definitions = [Definition "god, goddess"]
