@@ -30,7 +30,7 @@ tests = "Latin.ParserTest" ~:
   -- , verbTests
   -- , indeclTests
   -- , correlTests
-  -- , subentryTests
+  , generalTests
   ]
 
 nounTests = "nounTests" ~:
@@ -77,55 +77,6 @@ nounTests = "nounTests" ~:
                     , subEntries = []
                     , citations = [Textbook (locn 4 3) "W" 2]}],
 
-   "subentry" ~:
-   testParse (concat ["(poena noun f poenae\n",
-                      "  \"penalty, punishment\"\n",
-                      "  (\"poenās dāre\" \"to pay the penalty\"\n",
-                      "   #:cite W 2)\n",
-                      "  #:cite W 2)"])
-   ~?= Right [Entry { entryPos = locn 1 1
-                    , headWord = Noun "poena" "poenae"
-                                   (Set.singleton Fem)
-                                   Map.empty
-                    , entryNum = Nothing
-                    , note = Nothing
-                    , definitions = [Definition "penalty, punishment"]
-                    , subEntries = [
-                        Entry { entryPos = locn 3 3
-                              , headWord = Indeclinable "poenās dāre"
-                              , entryNum = Nothing
-                              , note = Nothing
-                              , definitions = [Definition "to pay the penalty"]
-                              , subEntries = []
-                              , citations = [Textbook (locn 4 4) "W" 2]}]
-                    , citations = [Textbook (locn 5 3) "W" 2]}],
-
-   "multiple entries" ~:
-   testParse (concat ["(nauta noun m nautae\n",
-                      "  \"sailor\"\n",
-                      "  #:cite W 3)\n",
-                      "(deus noun m deī\n",
-                      "  \"god, goddess\"\n",
-                      "  #:cite W 2)\n"])
-   ~?= Right [Entry { entryPos = locn 1 1
-                    , headWord = Noun "nauta" "nautae"
-                                   (Set.singleton Masc)
-                                   Map.empty
-                    , entryNum = Nothing
-                    , note = Nothing
-                    , definitions = [Definition "sailor"]
-                    , subEntries = []
-                    , citations = [Textbook (locn 3 3) "W" 3]},
-              Entry { entryPos = locn 4 1
-                    , headWord = Noun "deus" "deī"
-                                   (Set.singleton Masc)
-                                   Map.empty
-                    , entryNum = Nothing
-                    , note = Nothing
-                    , definitions = [Definition "god, goddess"]
-                    , subEntries = []
-                    , citations = [Textbook (locn 6 3) "W" 2]}],
-
    "override" ~:
    testParse (concat ["(deus noun m deī\n",
                       "  #:invalid gen pl\n",
@@ -150,6 +101,57 @@ nounTests = "nounTests" ~:
                     , subEntries = []
                     , citations = [Textbook (locn 6 3) "W" 2]}]
    ]
+
+generalTests = "generalTests" ~: [
+  "multiple entries" ~:
+  testParse (concat ["(nauta noun m nautae\n",
+                     "  \"sailor\"\n",
+                     "  #:cite W 3)\n",
+                     "(deus noun m deī\n",
+                     "  \"god, goddess\"\n",
+                     "  #:cite W 2)\n"])
+  ~?= Right [Entry { entryPos = locn 1 1
+                   , headWord = Noun "nauta" "nautae"
+                                  (Set.singleton Masc)
+                                  Map.empty
+                   , entryNum = Nothing
+                   , note = Nothing
+                   , definitions = [Definition "sailor"]
+                   , subEntries = []
+                   , citations = [Textbook (locn 3 3) "W" 3]},
+             Entry { entryPos = locn 4 1
+                   , headWord = Noun "deus" "deī"
+                                  (Set.singleton Masc)
+                                  Map.empty
+                   , entryNum = Nothing
+                   , note = Nothing
+                   , definitions = [Definition "god, goddess"]
+                   , subEntries = []
+                   , citations = [Textbook (locn 6 3) "W" 2]}],
+
+  "subentry" ~:
+  testParse (concat ["(poena noun f poenae\n",
+                     "  \"penalty, punishment\"\n",
+                     "  (\"poenās dāre\" \"to pay the penalty\"\n",
+                     "   #:cite W 2)\n",
+                     "  #:cite W 2)"])
+  ~?= Right [Entry { entryPos = locn 1 1
+                   , headWord = Noun "poena" "poenae"
+                                  (Set.singleton Fem)
+                                  Map.empty
+                   , entryNum = Nothing
+                   , note = Nothing
+                   , definitions = [Definition "penalty, punishment"]
+                   , subEntries = [
+                       Entry { entryPos = locn 3 3
+                             , headWord = Indeclinable "poenās dāre"
+                             , entryNum = Nothing
+                             , note = Nothing
+                             , definitions = [Definition "to pay the penalty"]
+                             , subEntries = []
+                             , citations = [Textbook (locn 4 4) "W" 2]}]
+                   , citations = [Textbook (locn 5 3) "W" 2]}]
+  ]
 
 testSrc = "test source"
 testParse = parse testSrc
