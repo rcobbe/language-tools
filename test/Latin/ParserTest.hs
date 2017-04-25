@@ -28,8 +28,8 @@ import LT.Latin.Parser
 tests = "Latin.ParserTest" ~:
   [ nounTests
   , verbTests
-  -- , indeclTests
-  -- , correlTests
+  , indeclTests
+  , correlTests
   , generalTests
   ]
 
@@ -118,6 +118,32 @@ verbTests = "verbTests" ~: [
             , definitions = [Definition "to give"]
             , subEntries = []
             , citations = [Textbook (locn 5 3) "W" 4]}]
+  ]
+
+indeclTests = "indeclTests" ~: [
+  "basic" ~:
+  testParse "(tamen \"nevertheless\" #:cite W 14)\n"
+  ~?= Right [
+      Entry { entryPos = locn 1 1
+            , headWord = Indeclinable "tamen"
+            , entryNum = Nothing
+            , note = Nothing
+            , definitions = [Definition "nevertheless"]
+            , subEntries = []
+            , citations = [Textbook (locn 1 23) "W" 14]}]
+  ]
+
+correlTests = "correlTests" ~: [
+  "basic" ~:
+  testParse "(et ... et \"both \\\\ldots{} and\" #:cite W 6)\n"
+  ~?= Right [
+      Entry { entryPos = locn 1 1
+            , headWord = Correlative "et" "et"
+            , entryNum = Nothing
+            , note = Nothing
+            , definitions = [Definition "both \\ldots{} and"]
+            , subEntries = []
+            , citations = [Textbook (locn 1 33) "W" 6]}]
   ]
 
 generalTests = "generalTests" ~: [
