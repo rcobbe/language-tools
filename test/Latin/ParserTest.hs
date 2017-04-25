@@ -88,6 +88,20 @@ nounTests = "nounTests" ~:
    ]
 
 generalTests = "generalTests" ~: [
+  "multiple definitions" ~:
+  testParse (concat ["(in\n",
+                     "  \"(+ acc) into, onto\"\n",
+                     "  \"(+ abl) in, on\"\n",
+                     "  #:cite W 4)\n"])
+  ~?= Right [Entry { entryPos = locn 1 1
+                   , headWord = Indeclinable "in"
+                   , entryNum = Nothing
+                   , note = Nothing
+                   , definitions = [Definition "(+ acc) into, onto",
+                                    Definition "(+ abl) in, on"]
+                   , subEntries = []
+                   , citations = [Textbook (locn 4 3) "W" 4]}],
+
   "entry note" ~:
   testParse (concat ["(deus noun m deī\n",
                      "  #:note \"test note\"\n",
