@@ -12,6 +12,35 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- | Representation of Latin letters and words.  We need to support the
+--   following operations:
+--
+--   1. Sorting entries into lexicographic order, where "lexicographic" is to
+--      be taken quite literally: the order in which the entries appear in the
+--      lexicon output.
+--
+--   1. Adding and removing macrons caused by morphological changes (adding
+--      an ending beginning in -nt or -ns, for instance)
+--
+--   1. Parsing input and generating LaTeX
+--
+--   We also need to support some notion of capitalization, although it's
+--   probably sufficient to allow capitalization only on the first letter
+--   of a word, rather than general capitalization.
+--
+--   Modifying length due to morphological changes is easier given an
+--   abstract representation of letters (@data Letter = A VowelLength | B |
+--   C | ...@), because it makes diphthongs easily apparent.  However, this
+--   representation complicates the implementation of ordering, for much
+--   the same reason.
+--
+--   I'd like to stick to a single representation, if possible.  If we make the
+--   assumption that we never have internal vowel hiatus between, say, A and E
+--   (or any other pair of vowels that also constitutes a diphthong), then
+--   we can probably get by with representing letters as a 'Char' plus a macron.
+--   Morphological construction gets a little tricky, but 'Data.Sequence.Seq'
+--   makes this fairly easy.  If it turns out that A/E internal hiatus /is/
+--   possible, then we'll need to revisit this.
 module LT.Latin.Letter
   ( Letter
   , base
@@ -26,47 +55,35 @@ module LT.Latin.Letter
   , literalWord
 ) where
 
-import Control.Monad.Trans.Except (Except)
+import Prelude hiding (Word)
+
+import qualified Control.Monad as CM
+import Control.Monad.Trans.Except (Except, throwE, runExcept)
 import qualified Data.Char as Char
+import qualified Data.List as List
 import Data.Function (on)
 
 -- | Represents a single Latin letter, with macron.  We represent macrons only
 --   for output representation and not for vowel length, as length is not
 --   otherwise significant (unlike Greek).
 data Letter = Letter { base :: Char, macron :: Macron }
-            deriving (Eq, Show)
+  deriving (Eq, Show)
+
+data Macron = NoMacron | Macron
+  deriving (Eq, Ord, Show)
 
 -- | Represents a Latin word
 newtype Word = Word { letters :: [Letter] }
-  deriving (Eq)
-
-data Macron = NoMacron | Macron
-  deriving (Eq, Show, Ord)
-
-instance Ord Letter where
-  -- | Compare two Latin letters.  The base letter is most significant,
-  --   followed by macrons, followed by case.
-  compare l1 l2 =
-    compareSeries [compare (Char.toLower (base l1)) (Char.toLower (base l2)),
-                   compare (macron l1) (macron l2),
-                   compare (base l1) (base l2)]
+  deriving (Eq, Show)
 
 instance Ord Word where
   -- | Compares two Latin words.  The base letters are most significant,
   --   followed by macrons, followed by case.
-  compare (Word w1) (Word w2) =
+  compare (Word letters1) (Word letters2) =
     compareSeries
-      [listCompare (compare `on` (Char.toLower . base)) w1 w2,
-       listCompare (compare `on` macron) w1 w2,
-       listCompare (compare `on` base) w1 w2]
-
-instance Show Letter where
-  show (Letter b NoMacron) = [b]
-  show (Letter b Macron) = "long " ++ [b]
-
-instance Show Word where
-  show (Word letters) =
-    "Word [" ++ (Map.intercalate ", " (map show letters)) ++ "]"
+      [listCompare (compare `on` (Char.toLower . base)) letters1 letters2,
+       listCompare (compare `on` macron) letters1 letters2,
+       listCompare (compare `on` base) letters1 letters2]
 
 -- | Compare two lists lexicographically, using the supplied function to
 --   compare elements.
@@ -84,7 +101,7 @@ listCompare compare = loop
 -- | Returns the result a series of comparisons; earlier comparisons are
 --   more significant than later ones.
 compareSeries :: [Ordering] -> Ordering
-compareSeries = foldl' update EQ
+compareSeries = List.foldl' update EQ
  where update EQ x    = x
        update accum _ = accum
 
@@ -93,9 +110,9 @@ makeLetter :: Char -> Macron -> Letter
 makeLetter base macron =
   if validLetter base macron
   then Letter base macron
-  else error (intercalate " " ["makeLetter: invalid combination:",
-                               show base,
-                               show macron])
+  else error (List.intercalate " " ["makeLetter: invalid combination:",
+                                    show base,
+                                    show macron])
 
 -- | Recognizes valid combinations of base characters and macrons
 validLetter :: Char -> Macron -> Bool
@@ -127,8 +144,7 @@ data ParseError = EmptyInput
                   -- ^ Internal error
                 | MissingLetter { offset :: !Int }
                   -- ^ Macron with no following letter
-                | InvalidMacro { offset :: !Int }
-                  -- ^ Macron before invalid letter (consonant or diphthong)
+                | InvalidLetter { offset :: !Int }
   deriving (Eq, Show)
 
 -- | Parse a single word, which must extend to the end of the input
@@ -137,6 +153,25 @@ parseWord src =
   do CM.when (null src) (throwE EmptyInput)
      letters <- wordLoop 0 src
      return $ Word letters
+
+-- | Parse a single word but signal error if the parse fails.  To be used only
+--   with literal strings in the program source; use 'parseWord' for user
+--   input.
+literalWord :: String -> Word
+literalWord src =
+  case runExcept (parseWord src) of
+    Left EmptyInput -> error "literalWord: empty input"
+    Left (InternalError offset msg) ->
+      error (concat ["literalWord: internal parser error at offset ",
+                     show offset,
+                     ": ",
+                     msg])
+    Left (MissingLetter offset) ->
+      error (concat ["literalWord: macron with no following letter at offset ",
+                     show offset])
+    Left (InvalidLetter offset) ->
+      error ("literalWord: invalid letter at offset " ++ show offset)
+    Right w -> w
 
 -- | Main loop for parsing a word; the first argument is the offset of the
 --   current letter (equivalently, the number of letters previoulsy parsed).
@@ -148,14 +183,19 @@ wordLoop index src =
      return $ letter : restResult
 
 -- | Parse a single letter; the first argument is the letter offset of the
---   input.
+--   input.  Does not attempt to guard against putting a macron on one of the
+--   letters in a diphthong.
 parseLetter :: Int -> String -> Except ParseError (Letter, String)
 parseLetter index [] =
   throwE $ InternalError index "parseLetter: empty input"
 parseLetter index src =
   do let (macrons, rest) = span isSrcMacron src
      CM.when (null rest) (throwE $ MissingLetter index)
-      (base, hasCombiningMacron) =
+     let m = if null macrons then NoMacron else Macron
+         base = head rest
+     if validLetter base m
+     then return (makeLetter base m, tail rest)
+     else throwE $ InvalidLetter index
 
 -- | Recognize the ways in which a macron can be expressed in the input.
 --   Allow underscores, macron characters, and combining macrons.

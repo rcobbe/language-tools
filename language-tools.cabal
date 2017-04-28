@@ -31,6 +31,7 @@ Library
   GHC-Options: -fwarn-incomplete-patterns -fwarn-unrecognised-pragmas
   Exposed-Modules:
     LT.Latin.Ast,
+    LT.Latin.Letter,
     LT.Latin.Parser,
     LT.Latin.Scanner,
     LT.Text
@@ -38,6 +39,7 @@ Library
     base == 4.8.*,
     array == 0.5.*,
     containers == 0.5.*,
+    transformers == 0.4.*,
     text == 1.2.*,
     textual == 2.0.*
 
@@ -51,6 +53,7 @@ Test-Suite language-tools-tests
     base == 4.8.*,
     HUnit == 1.6.*,
     containers == 0.5.*,
+    transformers == 0.4.*,
     language-tools
                      
                      
