@@ -189,6 +189,7 @@ parseLetter :: Int -> String -> Except ParseError (Letter, String)
 parseLetter index [] =
   throwE $ InternalError index "parseLetter: empty input"
 parseLetter index src =
+  -- XXX doesn't recognize precomposed letters, like ā
   do let (macrons, rest) = span isSrcMacron src
      CM.when (null rest) (throwE $ MissingLetter index)
      let m = if null macrons then NoMacron else Macron
