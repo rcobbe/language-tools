@@ -18,6 +18,7 @@ import Control.Monad
 import System.Exit
 import Test.HUnit
 
+import qualified Latin.LetterTest
 import qualified Latin.ScannerTest
 import qualified Latin.ParserTest
 
@@ -28,6 +29,7 @@ main =
 
 tests =
   "Language Tools" ~:
-  [ Latin.ScannerTest.tests
+  [ Latin.LetterTest.tests
+  , Latin.ScannerTest.tests
   , Latin.ParserTest.tests
   ]
