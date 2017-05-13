@@ -51,6 +51,7 @@ module LT.Latin.Letter
   , Word
   , letters
   , makeWord
+  , ParseError(..)
   , parseWord
   , literalWord
 ) where
