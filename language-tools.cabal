@@ -54,6 +54,7 @@ Test-Suite language-tools-tests
     HUnit == 1.6.*,
     containers == 0.5.*,
     transformers == 0.4.*,
+    test-utils == 1.6.*,
     language-tools
                      
                      
