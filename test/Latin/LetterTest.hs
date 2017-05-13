@@ -17,6 +17,7 @@ module Latin.LetterTest(tests) where
 import LT.Latin.Letter
 
 import Test.HUnit.Base
+import Test.Utils
 
 tests = "Latin.LetterTest" ~:
   [ validLetterTests
@@ -51,13 +52,25 @@ parseWordTests =
     assertNoExcept amare (parseWord "am_are"),
 
     "combining diacritical macro" ~:
-    assertNoExcept amare (parseWord "am\x0304\&re"),
+    assertNoExcept amare (parseWord "am\x0304\&are"),
 
     "macron character" ~:
     assertNoExcept amare (parseWord "am\x00AF\&are"),
 
+    "underscore macron" ~:
+    assertNoExcept amare (parseWord "am_are"),
+
     "multiple macrons" ~:
-    assertNoExcept amare (parseWord "am_\x00AF\x0304\&are")
+    assertNoExcept amare (parseWord "am_\x00AF\x0304\&are"),
+
+    "precomposed macron" ~:
+    assertNoExcept amare (parseWord "amāre"),
+
+    "macron on invalid letter" ~:
+    assertExcept (InvalidLetter 2) (parseWord "am_re"),
+
+    "macron at end of word" ~:
+    assertExcept (MissingLetter 3) (parseWord "abc_")
   ]
 
 -- Replace with quickcheck tests, as in Greek library?
