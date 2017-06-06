@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiWayIf #-}
+
 -- Copyright 2017 Richard Cobbe
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
@@ -190,14 +192,30 @@ parseLetter :: Int -> String -> Except ParseError (Letter, String)
 parseLetter index [] =
   throwE $ InternalError index "parseLetter: empty input"
 parseLetter index src =
-  -- XXX doesn't recognize precomposed letters, like ā
   do let (macrons, rest) = span isSrcMacron src
      CM.when (null rest) (throwE $ MissingLetter index)
-     let m = if null macrons then NoMacron else Macron
-         base = head rest
-     if validLetter base m
-     then return (makeLetter base m, tail rest)
-     else throwE $ InvalidLetter index
+     baseLetter <- parseBase index (head rest)
+     if | null macrons -> return (baseLetter, tail rest)
+        | validLetter (base baseLetter) Macron ->
+            return (baseLetter { macron = Macron }, tail rest)
+        | otherwise -> throwE $ InvalidLetter index
+
+-- | Parses a single base letter, possibly including precomposed vowels and
+-- | macrons, but not including any combining diacriticals.
+parseBase :: Int -> Char -> Except ParseError Letter
+parseBase _ '\x0100' = return $ Letter 'A' Macron
+parseBase _ '\x0101' = return $ Letter 'a' Macron
+parseBase _ '\x0112' = return $ Letter 'E' Macron
+parseBase _ '\x0113' = return $ Letter 'e' Macron
+parseBase _ '\x012A' = return $ Letter 'I' Macron
+parseBase _ '\x012B' = return $ Letter 'i' Macron
+parseBase _ '\x014C' = return $ Letter 'O' Macron
+parseBase _ '\x014D' = return $ Letter 'o' Macron
+parseBase _ '\x016A' = return $ Letter 'U' Macron
+parseBase _ '\x016B' = return $ Letter 'u' Macron
+parseBase index c
+  | isLatinLetter c = return $ Letter c NoMacron
+  | otherwise       = throwE $ InvalidLetter index
 
 -- | Recognize the ways in which a macron can be expressed in the input.
 --   Allow underscores, macron characters, and combining macrons.
