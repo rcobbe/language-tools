@@ -90,6 +90,9 @@ instance Ord Word where
 
 -- | Compare two lists lexicographically, using the supplied function to
 --   compare elements.
+--
+--   Can't use foldl or foldl', as they only work on a single list.  Can't
+--   zip up the lists, because that discards the suffix of the longer list.
 listCompare :: (a -> a -> Ordering) -> [a] -> [a] -> Ordering
 listCompare compare = loop
   where loop []     [] = EQ
