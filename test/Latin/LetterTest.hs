@@ -74,6 +74,28 @@ parseWordTests =
   ]
 
 -- Replace with quickcheck tests, as in Greek library?
-wordOrderTests = [3 ~?= 4]
+wordOrderTests = [
+  "equal words" ~:
+  (compare (parseWord "am_are") (parseWord "amāre")) ~?= EQ,
+
+  "prefix" ~:
+  (compare (parseWord "am_ab_at") (parseWord "am_ab_atis")) ~?= LT,
+
+  "extension" ~:
+  (compare (parseWord "am_ab_atis") (parseWord "am_ab_at")) ~?= GT,
+
+  "differ only in length" ~:
+  (compare (parseWord "venit") (parseWord "v_enit")) ~?= LT,
+
+  "differ in length, but different letters" ~:
+  (compare (parseWord "venit") (parseWord "v_enistis")) ~?= GT,
+
+  "differ only in case" ~:
+  (compare (parseWord "Forum") (parseWord "forum")) ~?= GT,
+
+  "differ in case, but different letters" ~:
+  (compare (parseWord "forum") (parseWord "For=o")) ~?= GT,
+
+  "
 
 assertFalse = assert . not
