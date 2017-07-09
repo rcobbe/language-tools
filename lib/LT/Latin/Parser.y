@@ -18,6 +18,7 @@
 module LT.Latin.Parser(parse) where
 
 import qualified Control.Monad as CM
+import Control.Monad.Trans.Except (runExcept)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
@@ -25,6 +26,8 @@ import qualified Data.Set as Set
 import LT.Latin.Ast
 import LT.Latin.Scanner
 import LT.Text (Text)
+import qualified LT.Text as Text
+import qualified LT.Latin.Letter as Latin
 
 }
 
@@ -90,6 +93,7 @@ Head :: { HeadWord }
   | VerbHead                            { $1 }
   | Word ellipsis Word                  { Correlative $1 $3 }
   | Word                                { Indeclinable $1 }
+  | PhrasalHead                         { $1 }
 
 NounHead :: { HeadWord }
   : WordPos noun NonEmptySeq(Gender)
@@ -101,6 +105,9 @@ VerbHead :: { HeadWord }
   : WordPos verb Word Word Word
     Seq(Override(VerbParse))            {% checkOverrides (snd $1) $6 >>=
                                              return . (Verb (fst $1) $3 $4 $5) }
+
+PhrasalHead :: { HeadWord }
+  : '(' Word NonEmptySeq(Word) ')'      { Phrase ($2 : $3) }
 
 Body :: { Body }
   : Opt(Note)
@@ -159,13 +166,16 @@ Mood :: { Mood }
   | imper                               { Imper }
   | subj                                { Subj }
 
-WordPos :: { (Text, Location) }
-  : string                              { (strval $1, loc $1) }
-  | symbol                              { (symval $1, loc $1) }
+WordPos :: { (Latin.Word, Location) }
+  : string                              {% parseLatinWordPos
+                                             (loc $1, strval $1) }
+  | symbol                              {% parseLatinWordPos
+                                             (loc $1, symval $1) }
 
-Word :: { Text }
-  : string                              { strval $1 }
-  | symbol                              { symval $1 }
+
+Word :: { Latin.Word }
+  : string                              {% parseLatinWord (loc $1, strval $1) }
+  | symbol                              {% parseLatinWord (loc $1, symval $1) }
 
 -- Production a -> Production (a, Override)
 Override(P)
@@ -238,10 +248,28 @@ checkOverrides loc overrides =
 lexwrap :: (Token -> Alex a) -> Alex a
 lexwrap = (alexMonadScan >>=)
 
+-- | Parses a string or symbol from the given input location as a Latin word.
+--   Returns the location as well as the word.  Causes the overall parse to fail
+--   if the input is not valid Latin.
+parseLatinWordPos :: (Location, Text) -> Alex (Latin.Word, Location)
+parseLatinWordPos (loc, lexeme) =
+  case runExcept (Latin.parseWord (Text.toString lexeme)) of
+    Left err -> alexError (prependLocation loc (Latin.formatParseError err))
+    Right word -> return (word, loc)
+
+-- | Variant of 'parseLatinWordPos' that only returns the word
+parseLatinWord :: (Location, Text) -> Alex Latin.Word
+parseLatinWord input = parseLatinWordPos input >>= (return . fst)
+
 happyError :: Token -> Alex a
 happyError t =
   alexError
     (formatLocationForError (loc t)
       ("parse error on token " ++ (shows t "\n")))
+
+-- | Prepends location ("source:line:col: ") to error message
+prependLocation :: Location -> String -> String
+prependLocation (Location src line col) msg =
+  concat [src, ":", show line, ":", show col, ": ", msg]
 
 }

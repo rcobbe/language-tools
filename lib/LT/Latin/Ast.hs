@@ -14,10 +14,13 @@
 
 module LT.Latin.Ast where
 
+import Prelude hiding (Word)
+
 import Data.Map (Map)
 import Data.Set (Set)
 
 import LT.Text (Text)
+import LT.Latin.Letter (Word)
 
 -- | A single vocabulary item, with morphological information and definitions.
 data Entry = Entry { entryPos :: Location
@@ -48,20 +51,21 @@ data Entry = Entry { entryPos :: Location
 -- | The head word of an 'Entry'.  Contains all morphological information, so
 --   know we never have, e.g., a noun's morphological info with a correlative
 --   head word.
-data HeadWord = Noun { nom :: Text
-                     , gen :: Text
+data HeadWord = Noun { nom :: Word
+                     , gen :: Word
                      , genders :: Set Gender
                        -- ^ must be non-empty
                      , n_overrides :: OverrideMap NounParse
                      }
-              | Verb { pp1 :: Text
-                     , pp2 :: Text
-                     , pp3 :: Text
-                     , pp4 :: Text
+              | Verb { pp1 :: Word
+                     , pp2 :: Word
+                     , pp3 :: Word
+                     , pp4 :: Word
                      , v_overrides :: OverrideMap VerbParse
                      }
-              | Correlative Text Text
-              | Indeclinable Text
+              | Correlative Word Word
+              | Indeclinable Word
+              | Phrase [Word]  -- nonempty list
               deriving (Eq, Show)
 
 -- XXX are there Latin nouns with more than one gender?
@@ -98,8 +102,8 @@ type OverrideMap key = Map key Override
 --   least for the moment.
 data Override =
     Invalid                 -- ^ Form does not exist
-  | Replacement (Set Text)  -- ^ Replace regular form
-  | Alternative (Set Text)  -- ^ Augment regular form
+  | Replacement (Set Word)  -- ^ Replace regular form
+  | Alternative (Set Word)  -- ^ Augment regular form
   deriving (Eq, Show)
 
 -- | Identifies a specific form of a noun.

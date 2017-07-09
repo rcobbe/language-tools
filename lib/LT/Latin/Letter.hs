@@ -55,6 +55,7 @@ module LT.Latin.Letter
   , letters
   , makeWord
   , ParseError(..)
+  , formatParseError
   , parseWord
   , literalWord
 ) where
@@ -162,6 +163,15 @@ data ParseError = EmptyInput
                   -- ^ Macron with no following letter
                 | InvalidLetter { offset :: !Int }
   deriving (Eq, Show)
+
+formatParseError :: ParseError -> String
+formatParseError EmptyInput = "parse error: empty input"
+formatParseError (InternalError offset msg) =
+  concat ["internal parser error at offset ", show offset, ": ", msg]
+formatParseError (MissingLetter offset) =
+  concat ["macron with no following letter at offset ", show offset]
+formatParseError (InvalidLetter offset) =
+  concat ["invalid letter at offset ", show offset]
 
 -- | Parse a single word, which must extend to the end of the input
 parseWord :: String -> Except ParseError Word

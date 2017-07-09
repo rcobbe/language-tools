@@ -24,6 +24,7 @@ import Test.HUnit
 -- import LT.Text (Text)
 import LT.Latin.Ast
 import LT.Latin.Parser
+import LT.Latin.Letter (literalWord)
 
 tests = "Latin.ParserTest" ~:
   [ nounTests
@@ -39,7 +40,7 @@ nounTests = "nounTests" ~:
                       "  \"island\"\n",
                       "  #:cite W 1)"])
    ~?= Right [Entry { entryPos = locn 1 1
-                    , headWord = Noun "īnsula" "īnsulae"
+                    , headWord = Noun (lit "īnsula") (lit "īnsulae")
                         (Set.singleton Fem)
                         Map.empty
                     , entryNum = Nothing
@@ -53,7 +54,7 @@ nounTests = "nounTests" ~:
                       "  \"god, goddess\"\n",
                       "  #:cite W 2)"])
    ~?= Right [Entry { entryPos = locn 1 1
-                    , headWord = Noun "deus" "deī"
+                    , headWord = Noun (lit"deus") (lit "deī")
                                    (Set.fromList [Masc, Fem])
                                    Map.empty
                     , entryNum = Nothing
@@ -66,20 +67,20 @@ nounTests = "nounTests" ~:
    testParse (concat ["(deus noun m deī\n",
                       "  #:invalid gen pl\n",
                       "  #:augment voc sg (deī)\n",
-                      "  #:replace voc pl (bogusReplacement bogusRepTwo)\n",
+                      "  #:replace voc pl (bogusReplacement anotherBogusRep)\n",
                       "  \"god, goddess\"\n",
                       "  #:cite W 2)\n"])
    ~?= Right [Entry { entryPos = locn 1 1
-                    , headWord = Noun "deus" "deī"
+                    , headWord = Noun (lit "deus") (lit "deī")
                                    (Set.singleton Masc)
                                    (Map.fromList
                                     [(NounParse Voc Sing,
-                                      Alternative (Set.singleton "deī")),
+                                      Alternative (Set.singleton (lit "deī"))),
                                      (NounParse Gen Pl, Invalid),
                                      (NounParse Voc Pl,
                                       Replacement
-                                       (Set.fromList ["bogusReplacement",
-                                                      "bogusRepTwo"]))])
+                                       (Set.fromList [lit "bogusReplacement",
+                                                      lit "anotherBogusRep"]))])
                     , entryNum = Nothing
                     , note = Nothing
                     , definitions = [Definition "god, goddess"]
@@ -93,7 +94,8 @@ verbTests = "verbTests" ~: [
                      "  \"to like, love\"\n",
                      "  #:cite W 3)\n"])
   ~?= Right [Entry { entryPos = locn 1 1
-                   , headWord = Verb "amō" "amāre" "amāvī" "amātum" Map.empty
+                   , headWord = Verb (lit "amō") (lit "amāre")
+                                     (lit "amāvī") (lit "amātum") Map.empty
                    , entryNum = Nothing
                    , note = Nothing
                    , definitions = [Definition "to like, love"]
@@ -108,10 +110,11 @@ verbTests = "verbTests" ~: [
                      "  #:cite W 4)\n"])
   ~?= Right [
       Entry { entryPos = locn 1 1
-            , headWord = Verb "dō" "dāre" "dēdī" "datum"
+            , headWord = Verb (lit "dō") (lit "dāre")
+                              (lit "dēdī") (lit "datum")
                            (Map.fromList
                              [(Finite Second Sing Pres Active Indic,
-                               Replacement (Set.fromList ["das"])),
+                               Replacement (Set.fromList [lit "das"])),
                               (Infinitive Pres Passive, Invalid)])
             , entryNum = Nothing
             , note = Nothing
@@ -125,7 +128,7 @@ indeclTests = "indeclTests" ~: [
   testParse "(tamen \"nevertheless\" #:cite W 14)\n"
   ~?= Right [
       Entry { entryPos = locn 1 1
-            , headWord = Indeclinable "tamen"
+            , headWord = Indeclinable (lit "tamen")
             , entryNum = Nothing
             , note = Nothing
             , definitions = [Definition "nevertheless"]
@@ -138,7 +141,7 @@ correlTests = "correlTests" ~: [
   testParse "(et ... et \"both \\\\ldots{} and\" #:cite W 6)\n"
   ~?= Right [
       Entry { entryPos = locn 1 1
-            , headWord = Correlative "et" "et"
+            , headWord = Correlative (lit "et") (lit "et")
             , entryNum = Nothing
             , note = Nothing
             , definitions = [Definition "both \\ldots{} and"]
@@ -153,7 +156,7 @@ generalTests = "generalTests" ~: [
                      "  \"(+ abl) in, on\"\n",
                      "  #:cite W 4)\n"])
   ~?= Right [Entry { entryPos = locn 1 1
-                   , headWord = Indeclinable "in"
+                   , headWord = Indeclinable (lit "in")
                    , entryNum = Nothing
                    , note = Nothing
                    , definitions = [Definition "(+ acc) into, onto",
@@ -167,7 +170,7 @@ generalTests = "generalTests" ~: [
                      "  \"god, goddess\"\n",
                      "  #:cite W 2)"])
   ~?= Right [Entry { entryPos = locn 1 1
-                   , headWord = Noun "deus" "deī"
+                   , headWord = Noun (lit "deus") (lit "deī")
                                   (Set.singleton Masc)
                                   Map.empty
                    , entryNum = Nothing
@@ -184,7 +187,7 @@ generalTests = "generalTests" ~: [
                      "  \"god, goddess\"\n",
                      "  #:cite W 2)\n"])
   ~?= Right [Entry { entryPos = locn 1 1
-                   , headWord = Noun "nauta" "nautae"
+                   , headWord = Noun (lit "nauta") (lit "nautae")
                                   (Set.singleton Masc)
                                   Map.empty
                    , entryNum = Nothing
@@ -193,7 +196,7 @@ generalTests = "generalTests" ~: [
                    , subEntries = []
                    , citations = [Textbook (locn 3 3) "W" 3]},
              Entry { entryPos = locn 4 1
-                   , headWord = Noun "deus" "deī"
+                   , headWord = Noun (lit "deus") (lit "deī")
                                   (Set.singleton Masc)
                                   Map.empty
                    , entryNum = Nothing
@@ -205,11 +208,11 @@ generalTests = "generalTests" ~: [
   "subentry" ~:
   testParse (concat ["(poena noun f poenae\n",
                      "  \"penalty, punishment\"\n",
-                     "  (\"poenās dāre\" \"to pay the penalty\"\n",
+                     "  ((poenās dāre) \"to pay the penalty\"\n",
                      "   #:cite W 2)\n",
                      "  #:cite W 2)"])
   ~?= Right [Entry { entryPos = locn 1 1
-                   , headWord = Noun "poena" "poenae"
+                   , headWord = Noun (lit "poena") (lit "poenae")
                                   (Set.singleton Fem)
                                   Map.empty
                    , entryNum = Nothing
@@ -217,7 +220,7 @@ generalTests = "generalTests" ~: [
                    , definitions = [Definition "penalty, punishment"]
                    , subEntries = [
                        Entry { entryPos = locn 3 3
-                             , headWord = Indeclinable "poenās dāre"
+                             , headWord = Phrase [lit "poenās", lit "dāre"]
                              , entryNum = Nothing
                              , note = Nothing
                              , definitions = [Definition "to pay the penalty"]
@@ -231,3 +234,5 @@ testParse = parse testSrc
 
 locn :: Int -> Int -> Location
 locn = Location testSrc
+
+lit = literalWord
