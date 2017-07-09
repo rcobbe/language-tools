@@ -49,6 +49,7 @@ module LT.Latin.Letter
   , macron
   , Macron(..)
   , validLetter
+  , baseChars
   , makeLetter
   , Word
   , letters
@@ -64,6 +65,8 @@ import qualified Control.Monad as CM
 import Control.Monad.Trans.Except (Except, throwE, runExcept)
 import qualified Data.Char as Char
 import qualified Data.List as List
+import Data.Set (Set)
+import qualified Data.Set as Set
 import Data.Function (on)
 
 -- | Represents a single Latin letter, with macron.  We represent macrons only
@@ -125,14 +128,21 @@ validLetter :: Char -> Macron -> Bool
 validLetter base NoMacron = isLatinLetter base
 validLetter base Macron = isLatinVowel base
 
--- | Recognizes valid Latin letters.  Disallow J and W, but allow V -- somewhat
---   inconsistent, but it has long been the standard for printing Latin in
---   English-speaking countries.  (Oxford University Press is starting to use U
---   instead of V globally, however.)
+-- | Set of chars legal as base chars in a 'Letter'.  Exclude J and W, but
+--   include V.  This is somewhat inconsistent, but it has long been the
+--   standard for printing Latin texts in English-speaking countries.  (Some
+--   publishers, notably Oxford University Press, are starting to use U instead
+--   of V globally, however.)
+baseChars :: Set Char
+baseChars =
+  let minus elt set = Set.delete set elt
+      lowercase = Set.fromList ['a'..'z'] `minus` 'j' `minus` 'w'
+  in Set.union lowercase (Set.map Char.toUpper lowercase)
+
+-- | Recognizes valid Latin letters.
 isLatinLetter :: Char -> Bool
-isLatinLetter c =
-  let c' = Char.toLower c
-  in 'a' <= c' && c' <= 'z' && c' /= 'j' && c' /= 'w'
+isLatinLetter = (baseChars `contains`)
+  where contains = flip Set.member
 
 -- | Recognize Latin vowels.
 isLatinVowel c =
