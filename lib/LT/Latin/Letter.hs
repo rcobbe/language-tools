@@ -190,7 +190,7 @@ literalWord src =
     Right w -> w
 
 -- | Main loop for parsing a word; the first argument is the offset of the
---   current letter (equivalently, the number of letters previoulsy parsed).
+--   current letter (equivalently, the number of letters previously parsed).
 wordLoop :: Int -> String -> Except ParseError [Letter]
 wordLoop _     []  = return []
 wordLoop index src =
