@@ -135,7 +135,7 @@ validLetter base Macron = isLatinVowel base
 --   of V globally, however.)
 baseChars :: Set Char
 baseChars =
-  let minus elt set = Set.delete set elt
+  let minus = flip Set.delete
       lowercase = Set.fromList ['a'..'z'] `minus` 'j' `minus` 'w'
   in Set.union lowercase (Set.map Char.toUpper lowercase)
 
