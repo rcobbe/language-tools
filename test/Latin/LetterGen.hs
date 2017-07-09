@@ -30,7 +30,7 @@ data LikelyEqualWords = LikelyEqualWords Word Word
 instance Arbitrary LikelyEqualWords where
   arbitrary =
     do (w1, w2) <- arbitrary
-       equal <- arbitraryBoundedRandom
+       equal <- choose (False, True)
        return $ LikelyEqualWords w1 (if equal then w1 else w2)
 
 -- | Contains two 'Word' values; when created by the generator, the first word
@@ -42,7 +42,7 @@ instance Arbitrary PrefixWords where
   arbitrary =
     do w <- arbitrary
        let ls = letters w
-       prefixSize <- elements [1..length ls]
+       prefixSize <- choose (1, length ls)
        return $ PrefixWords (makeWord (take prefixSize ls)) w
 
 -- | Contains two 'Word' values.  When created by the generator, the two words
@@ -71,33 +71,12 @@ instance Arbitrary CaseWords where
       (x1:x2:xs, y1:y2:ys) -> [CaseWords (makeWord (x2:xs)) (makeWord (y2:ys))]
       _ -> []
 
--- | Type used to randomly generate length of word to be generated
-newtype WordLength = WordLength Int
-  deriving (Eq, Ord, Show)
-
-instance Bounded WordLength where
-  minBound = WordLength 1
-  maxBound = WordLength 30  -- somewhat arbitrary choice for max word length
-
-instance Random WordLength where
-  -- doesn't guarantee that all WordLength values are equally likely, but
-  -- should be close enough for most testing
-  randomR (WordLength lo, WordLength hi) g =
-    let width = hi - lo + 1
-        (num, g') = Random.next g
-    in
-      if (width <= 0)
-      then (WordLength lo, g')
-      else (WordLength (lo + ((abs num) `mod` width)), g')
-
-  random = randomR (minBound, maxBound)
-
 instance Arbitrary Word where
 -- | Generate an arbitrary 'Word' of 'Letter' values.  Each individual letter
 --   is guaranteed to be valid, but word-level invariants (e.g., vowel before
 --   "ns" is long) are not guaranteed.
   arbitrary =
-    do (WordLength size) <- arbitraryBoundedRandom
+    do size <- choose ((1, 30) :: (Int, Int))
        (letters :: [Letter]) <- vectorOf size arbitrary
        return $ makeWord letters
 
