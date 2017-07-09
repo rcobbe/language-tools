@@ -54,7 +54,7 @@ instance Arbitrary LengthWords where
   arbitrary =
     do (CaseWords w1 w2) <- arbitrary
        w2' <- updateWord w2 updateMacron [NoMacron, Macron]
-       return $ LengthWords w1 w2
+       return $ LengthWords w1 w2'
 
 -- | Contains two 'Word' values.  When created by the generator, the two
 --   words differ only in letter case.
