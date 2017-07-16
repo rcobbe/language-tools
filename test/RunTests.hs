@@ -21,6 +21,7 @@ import Test.HUnit
 import qualified Latin.LetterTest
 import qualified Latin.ScannerTest
 import qualified Latin.ParserTest
+import qualified Latin.OutputTest
 
 main :: IO ()
 main =
@@ -32,4 +33,5 @@ tests =
   [ Latin.LetterTest.tests
   , Latin.ScannerTest.tests
   , Latin.ParserTest.tests
+  , Latin.OutputTest.tests
   ]
