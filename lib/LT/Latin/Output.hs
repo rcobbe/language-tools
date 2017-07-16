@@ -34,5 +34,7 @@ letterToLaTeX ltr =
                       , Text.singleton '}' ]
      else baseText
 
+-- | Translates a 'Word' to LaTeX syntax.
+wordToLaTeX :: Word -> Text
 wordToLaTeX wd =
   Text.concat (map letterToLaTeX (letters wd))
