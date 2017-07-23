@@ -35,6 +35,7 @@ Library
     LT.Latin.Parser,
     LT.Latin.Scanner,
     LT.Latin.Output,
+    LT.Private.Output,
     LT.Text
   Build-Depends:
     base == 4.8.*,
