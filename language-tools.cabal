@@ -54,11 +54,11 @@ Test-Suite language-tools-tests
   Build-Depends:
     base == 4.8.*,
     HUnit == 1.6.*,
-    QuickCheck == 2.9.*,
+    QuickCheck == 2.10.*,
     containers == 0.5.*,
     random == 1.1.*,
     transformers == 0.4.*,
-    test-utils == 1.6.*,
+    test-utils == 1.7.*,
     language-tools
                      
                      
