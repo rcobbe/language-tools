@@ -98,10 +98,103 @@ renderWordForGuide (Phrase wds) =
 
 -- | Generate LaTeX for an entry, either top-level or subentry.
 renderEntry :: Entry -> Text
-renderEntry e = undefined
+renderEntry e =
+  let (headerSuffix, noteText) =
+        case (note e) of
+          Just n -> ("", parensInRm (Text.concat [" \\textup{(", n, ")}, "]))
+          Nothing -> (", ", "")
+  in Text.concat
+      ([
+         renderHeader (headWord e) headerSuffix
+       , noteText
+       , renderCitations (citations e) "\\@."
+       , defnSpace
+       , renderDefinitions (definitions e)]
+       ++ map (Text.append defnSpace) (map renderEntry (subEntries e)))
+
+-- | Renders a non-empty list of 'Definition' values into LaTeX
+renderDefinitions :: [Definition] -> Text
+renderDefinitions [] =
+  error "renderDefinitions: expected at least one definition; got none"
+renderDefinitions [d] = renderDefinition d
+renderDefinitions (ds) =
+  Text.intercalate defnSpace
+    (zipWith addDefnNumber [1..] (map renderDefinition ds))
+
+-- | Renders a single 'Definition' to LaTeX, without any leading number
+renderDefinition :: Definition -> Text
+renderDefinition (Definition defn) =
+  parensInRm (Text.concat ["\\textit{", (addClosingPunct defn), "}"])
+
+-- | Adds closing punctuation and space adjustment to a rendered definition.
+--   If the supplied text ends in a punctuation character followed by zero
+--   or more closing parens, simply inserts the LaTeX space-adjustment control
+--   sequence \\\@ before the existing punctuation.  Otherwise, adds the
+--   space adjustment and a closing period.
+addClosingPunct :: Text -> Text
+addClosingPunct txt =
+  let (txtNoParens, trailingParens) = spanAtEnd (== ')') txt
+      (mainTxt, closingPunct) = spanAtEnd isPunct txtNoParens
+  in if (Text.null closingPunct)
+     then Text.concat [mainTxt, trailingParens, "\\@."]
+     else Text.concat [mainTxt, "\\@", closingPunct, trailingParens]
+  where isPunct '.' = True
+        isPunct '!' = True
+        isPunct '?' = True
+        isPunct _   = False
+
+-- | @spanAtEnd p t@ returns @(prefix, suffix)@, where
+--   @Text.concat prefix suffix@ = @t@, and @suffix@ is the longest suffix
+--   of @t@ containing only characters that satisfy the predicate @p@.
+spanAtEnd :: (Char -> Bool) -> Text -> (Text, Text)
+spanAtEnd p t =
+  let (pfx, sfx) = Text.span p (Text.reverse t)
+  in (Text.reverse sfx, Text.reverse pfx)
+
+-- | Generate LaTeX for the header of an entry, corresponding to the entry's
+--   'HeadWord'.
+renderHeader :: HeadWord -> Text -> Text
+renderHeader head suffix = undefined
+
+-- | Generate LaTeX for an entry's citations.
+renderCitations :: [Citation] -> Text -> Text
+renderCitations [] _ =
+  error "renderCitations: expected at least one citation; got none"
+renderCitations [cit] suffix = renderCitation cit suffix
+renderCitations (c:cs) suffix =
+  Text.concat [renderCitation c ";", " ", renderCitations cs suffix]
+
+renderCitation :: Citation -> Text -> Text
+renderCitation (Textbook _ book chapter) suffix =
+  Text.concat [
+      book
+    , "\\,"
+    , Text.fromString (show chapter)
+    , suffix
+    ]
+
+-- | Adds the indicated definition number to the LaTeX rendering of a
+--   definition.
+addDefnNumber :: Int -> Text -> Text
+addDefnNumber n defnText =
+  Text.concat [Text.fromString (show n), ".~", defnText]
 
 -- | Generate LaTeX for a Latin word, with the supplied suffix inside the
 --   Latin markup
 renderLatin :: Word -> Text -> Text
 renderLatin w suffix =
   Text.concat ["\\textlatin{" , wordToLaTeX w, suffix, "}"]
+
+-- | Wraps all parentheses in the supplied string with the necessary LaTeX
+--   to ensure that they appear upright, rather than slanted or italic, in
+--   the output.  Adds italic correction as necessary.
+parensInRm :: Text -> Text
+parensInRm str =
+  Text.concatMap escapeParen str
+  where escapeParen '(' = "\\/\\textup{(}"
+        escapeParen ')' = "\\/\\textup{)}"
+        escapeParen c = Text.singleton c
+
+-- | Space between definitions, and between heading & first definition
+defnSpace :: Text
+defnSpace = "\\hspace{.75em}"
