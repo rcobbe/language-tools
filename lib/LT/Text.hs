@@ -30,6 +30,7 @@ module LT.Text(
   , LT.Text.concatMap
   , intercalate
   , LT.Text.reverse
+  , LT.Text.span
   ) where
 
 import qualified Data.String as String
@@ -92,3 +93,12 @@ intercalate sep = Text . T.intercalate (unbox sep) . map unbox
 -- | Reverse a 'Text' value.
 reverse :: Text -> Text
 reverse = Text . T.reverse . unbox
+
+-- | 'span', applied to a predicate @p@ and a text @t@, returns a pair whose
+--   first element is the longest prefix (possibly empty) of @t@ containing
+--   only characters that satisfy @p@, and whose second element is the
+--   remainder of the 'Text'.
+span :: (Char -> Bool) -> Text -> (Text, Text)
+span p t =
+  let (pfx, sfx) = T.span p (unbox t)
+  in (Text pfx, Text sfx)
