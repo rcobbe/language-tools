@@ -92,7 +92,7 @@ renderWordForGuide (Indeclinable wd) = renderLatin wd ""
 renderWordForGuide (Phrase wds) =
   Text.concat [
       "\\textlatin{"
-    , Text.intercalate " " (map wordToLaTeX wds)
+    , Text.intercalate " " (renderLatinWords wds "")
     , "}"
     ]
 
@@ -101,7 +101,7 @@ renderEntry :: Entry -> Text
 renderEntry e =
   let (headerSuffix, noteText) =
         case (note e) of
-          Just n -> ("", parensInRm (Text.concat [" \\textup{(", n, ")}, "]))
+          Just n -> ("", parensInRm (Text.concat [" \\textup{", n, "}, "]))
           Nothing -> (", ", "")
   in Text.concat
       ([
@@ -154,7 +154,34 @@ spanAtEnd p t =
 -- | Generate LaTeX for the header of an entry, corresponding to the entry's
 --   'HeadWord'.
 renderHeader :: HeadWord -> Text -> Text
-renderHeader head suffix = undefined
+renderHeader (Noun nom gen genders overrides) suffix =
+  renderNounHeader nom gen genders overrides suffix
+renderHeader (Verb pp1 pp2 pp3 pp4 overrides) suffix =
+  renderVerbHeader pp1 pp2 pp3 pp4 overrides suffix
+renderHeader (Correlative w1 w2) suffix =
+  Text.concat [ "\\textbf{"
+              , renderLatin w1 ""
+              , "\ldots{}"
+              , renderLatin w2 suffix
+              , "}"
+              ]
+renderHeader (Indeclinable w) suffix =
+  Text.concat ["\\textbf{", renderLatin w suffix, "}"]
+renderHeader (Phrase words) suffix =
+  Text.concat [ "\\textbf{"
+              , Text.intercalate " " (renderLatinWords words suffix) suffix
+              , "}"]
+
+renderNounHeader :: Word -> Word -> Set Gender -> OverrideMap NounParse -> Text
+                 -> Text
+renderNounHeader nom gen genders overrides suffix =
+  Text.concat [ "\\textbf{"
+              , renderLatin nom ""
+              , "} "
+              , renderLatin gen ","
+              , " "
+              , renderGenders genders
+
 
 -- | Generate LaTeX for an entry's citations.
 renderCitations :: [Citation] -> Text -> Text
@@ -184,6 +211,13 @@ addDefnNumber n defnText =
 renderLatin :: Word -> Text -> Text
 renderLatin w suffix =
   Text.concat ["\\textlatin{" , wordToLaTeX w, suffix, "}"]
+
+renderLatinWords :: [Word] -> Text -> [Text]
+renderLatinWords [] _ =
+  error "renderLatinWords: expected at least one word; got none"
+renderLatinWords [w] suffix = [renderLatin w suffix]
+renderLatinWords (w:ws) suffix =
+  renderLatinWord w "" : renderLatinWords ws suffix
 
 -- | Wraps all parentheses in the supplied string with the necessary LaTeX
 --   to ensure that they appear upright, rather than slanted or italic, in
