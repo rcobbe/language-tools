@@ -1,0 +1,221 @@
+\documentclass[twoside]{article}
+
+%% More up-to-date example output is in ~/languages/greek/hq/lexicon.pdf.
+
+\usepackage{fontspec}
+\usepackage{xltxtra}
+\usepackage{xunicode}
+\usepackage[margin=1in]{geometry}
+\usepackage{hanging}
+\usepackage{multicol}
+\usepackage{polyglossia}
+
+%% due to a bug in TeXLive 2010, specifying usmax variant produces bogus
+%% output before the first lexicon entry.
+\setdefaultlanguage{english}%[variant=usmax]{english}
+\setromanfont[Mapping=tex-text]{Constantia}
+
+\setotherlanguages{greek,latin,sanskrit}
+\setkeys{greek}{variant=ancient,numerals=arabic}
+\newfontfamily\greekfont{Gentium Plus}[CharacterVariant=78]
+
+%% \newfontfamily\sanskritfont[Script=Devanagari]{Sanskrit 2003}
+\newfontfamily\sanskritfont{Devanagari MT}
+
+\newcommand{\gk}{\textgreek}
+\newcommand{\lt}{\textlatin}
+\newcommand{\sk}{\textsanskrit}
+
+\newenvironment{entry}[1]{%
+  \noindent\hangpara{1em}{1}\textbf{#1}\markboth{#1}{#1}}{%
+  \raggedright\par}
+
+%% two environments for tyepsetting subentries.  The first treats it as a
+%% full entry, merely indented within the containing entry.  The second
+%% typesets it "inline" in the larger entry.
+%%
+%% XXX: For the first variant, is there a way to repeat the main entry's
+%% head word if there's a page or column break right before the subentry?
+%% And do we need similar repeated headings when the second variant occurs
+%% at a page break?
+% \newenvironment{subentry}[1]{%
+%   \begin{list}{\mbox{}}{%
+%       \setlength{\topsep}{0ex}%
+%       \setlength{\leftmargin}{2.5em}%
+%       \setlength{\itemindent}{-1em}%
+%     }%
+%   \item\textbf{#1}}{%
+%     \raggedright\end{list}}
+\newenvironment{subentry}[1]{\hspace{.5em}\textbf{#1}}{}
+
+%% subcategorization information
+\newcommand{\subcat}[1]{\textit{#1}}
+
+%% syntactic information
+\newcommand{\syn}[1]{\textit{#1}}
+
+%% gender
+\newcommand{\gender}[1]{\textit{#1}}
+
+%% citation of usage
+%%  1: original quote
+%%  2: english
+%%  3: source info
+\newcommand{\example}[3]{\textit{#1 (#2), #3}}
+
+\begin{document}
+\pagestyle{myheadings}
+\begin{multicols}{2}
+
+\begin{entry}{\lt{amō}}
+  -āre, to like, love (W~1)
+\end{entry}
+
+\begin{entry}{cōgitō} -āre, to
+think, ponder, consider, plan (W~1).  Derivatives:
+cogitate.
+\end{entry}
+
+\begin{entry}{cōnservō} -āre (stronger form of servō), to
+  preserve, conserve, maintain (W~1).  Derivatives:
+  conservative, conservation.
+\end{entry}
+
+\begin{entry}{dēbeō} dēbēre dēbuī dēbitum (< dehibeō < de-habeō, to have
+  from a person), to owe; ought, must (W~1).  Derivatives:
+  debt, debit.
+\end{entry}
+
+\begin{entry}{dō} dare dedī datum (2sg pres. act. indic. dās,
+  2sg. pres. act. imper. dā), to give, offer (W~1).
+  Derivatives: date, data.
+\end{entry}
+
+\begin{entry}{fāma} -ae, \gender{f.}, 1.~rumor, report. 2.~fame, reputation (W~2).
+  Derivatives: famous, defame, infamy.
+\end{entry}
+
+\begin{entry}{fōrma} -ae, \gender{f.}, 1.~form, shape. 2.~beauty (W~2).
+  Derivatives: formal, format, formula, formless, deform, inform, etc., but
+  not formic, formidable.
+\end{entry}
+
+\begin{entry}{fortūna} -ae, \gender{f.}, fortune, luck (W~2).
+\end{entry}
+
+\begin{entry}{īra} -ae, \gender{f.}, ire, anger (W~1).  Derivatives: irate,
+  irascible, but not irritate.
+\end{entry}
+
+\begin{entry}{laudō} -āre, to praise (W~1).  Derivatives:
+  laud, laudable, laudatory.
+\end{entry}
+
+\begin{entry}{moneō} -ēre -uī -itum, to remind, advise, warn (W~1);
+  \example{\lt{monē mē sī errō}}{warn me if I go astray}{Virgil, Aeneid, I.243}.
+  Derivatives: admonish, admonition, monitor, monument, monster.
+\end{entry}
+
+\begin{entry}{nauta} -ae, \gender{m.}, sailor (W~2).
+\end{entry}
+
+\begin{entry}{patria} -ae, \gender{f.}, fatherland, native land, (one's) country
+  (W~2).\end{entry}
+
+\begin{entry}{pecūnia} -ae, \gender{f.}, money (W~2).  Derivatives: pecuniary,
+  impecunious; cp. peculation.
+\end{entry}
+
+\begin{entry}{philosophia} -ae, \gender{f.} (< \gk{φιλοσοφί\underline{α}}),
+  philosophy (W~2).
+\end{entry}
+
+\begin{entry}{poena} -ae, \gender{f.}, penalty, punishment (W~2).  Pad the
+  length out to see what subentries look like in a slightly more
+  interesting context.
+\begin{subentry}{poenās dare}, to pay the penalty (W~2).  Pad the length
+  out to see what this looks like with multiple lines.  Two lines are
+  necessary; three would be even better.  Four is overkill.  Five is right
+  out.
+  \end{subentry}
+\end{entry}
+
+\begin{entry}{poēta} -ae, \gender{m.}, poet (W~2).\end{entry}
+
+\begin{entry}{porta} -ae, \gender{f.}, gate, entrance\end{entry}
+
+\begin{entry}{salveō} -ēre --- ---, 1.~to be well, be in good health.
+  2.~pres. imper.: greetings (W~1).  Derivatives:
+  salvation, salve.
+\end{entry}
+
+\begin{entry}{servō} -āre, to preserve, save, keep, guard
+  (W~1).  Derivatives: reserve, reservoir.
+\end{entry}
+
+\begin{entry}{sine} \subcat{+ abl.} without.\end{entry}
+
+\begin{entry}{terreō} -ēre -uī -itum, to frighten, terrify
+  (W~1).  Derivatives: terrible, terrific, terror, deter.
+\end{entry}
+
+\begin{entry}{valeō} -ēre -uī valitūrum, to be strong, have power; to be
+  well; pres imper.: good-bye, farewell (W~1).
+  Derivatives: valid, invalidate, prevail, prevalent, valedictory.
+\end{entry}
+
+\begin{entry}{videō} -ēre vīdī vīsum, to see, observe; understand
+  (W~1).  Derivatives: provide, evident, view, review.
+\end{entry}
+
+\begin{entry}{vocō} -āre, to call, summon (W~1).
+  Derivatives: vocation, advocate, vocabulary, convoke, evoke, invoke,
+  provoke, revoke.
+\end{entry}
+
+\begin{entry}{\gk{ἀγορ\underline{ά}}} \gk{-ᾶς}, \gender{f.}, marketplace, civic center,
+  cultural center (HQ~1).  Derivatives: agoraphobia.
+\end{entry}
+
+\begin{entry}{\gk{ἀδελφός}} \gk{-οῦ} (voc. sg. \gk{ἄδελφε}), \gender{m.},
+  brother\end{entry}
+
+\begin{entry}{\gk{ἄνθρωπος}} \gk{-ου}, \gender{m.}, man, human being.\end{entry}
+
+\begin{entry}{\gk{ἀπό}}, \subcat{+ gen.} from, away from
+\end{entry}
+
+\begin{entry}{\gk{βιβλίον}} \gk{-ου}, \gender{n.}, book.\end{entry}
+
+\begin{entry}{\gk{δῶρον}} \gk{-ου}, \gender{n.}, gift; bribe (esp. pl).
+\end{entry}
+
+\begin{entry}{\gk{καί \ldots{} καί}}, both ... and
+\end{entry}
+
+\begin{entry}{\gk{μέν \ldots{} δέ}} \syn{postpos conj}, on one hand \ldots{}
+  on the other
+\end{entry}
+
+\begin{entry}{\gk{οὐ}} (\gk{οὐκ} before smooth breathing, \gk{οὐχ} before
+  rough), not
+\end{entry}
+
+\begin{entry}{\gk{παρά}}, 1.~\subcat{+ gen,} from (the side of); 2.~\subcat{+
+    dat,} at (the side of); 3.~\subcat{+ acc,} to (the side of); beside;
+  4.~\subcat{+ dat,} at the house of; 5.~\subcat{+ acc,} contrary to.
+\end{entry}
+
+\begin{entry}{\gk{πέμπω}} \gk{πέμψω ἔπεμψα πέπομφα πέπεμμαι ἐπέμφθην}, to
+  send (HQ~2).
+\end{entry}
+
+\begin{entry}{\sk{कृष्}} \sk{कर्षति} 1, to draw (SM~I.2).
+\end{entry}
+
+\end{multicols}
+\end{document}
+
+%%% Local Variables:
+%%% TeX-command-default: "XeLaTeX"
+%%% End:
